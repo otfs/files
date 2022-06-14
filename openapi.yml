@@ -1,0 +1,140 @@
+# 全局
+openapi: 3.0.0
+info:
+  title: "文件服务"
+  description: "统一的文件服务"
+  version: "1.0.0"
+servers:
+  - url: http://127.0.0.1:8080
+    description: 本地环境
+
+# 接口
+paths:
+  /generate-upload-url:
+    post:
+      operationId: GenerateFileUploadUrl
+      summary: 生成文件上传签名
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenerateFileUploadUrlRequest"
+      responses:
+        200:
+          description: body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenerateFileUploadUrlResponse"
+  /upload:
+    post:
+      operationId: UploadFile
+      summary: 上传文件
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              properties:
+                file:
+                  type: file
+                  description: 文件流
+      responses:
+        200:
+          description: body
+          content:
+            application/json:
+              schema:
+                properties:
+                  url:
+                    type: string
+                    description: 文件访问url地址
+  /files/{id}/generate-url:
+    post:
+      operationId: GenerateFileUrl
+      summary: 生成文件访问地址
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: 文件ID
+      responses:
+        200:
+          description: body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenerateFileUrlResponse"
+  /files/generate-url-batch:
+    post:
+      operationId: BatchGenerateFileUrl
+      summary: 批量生成文件访问地址
+      parameters:
+        - in: query
+          required: true
+          name: ids
+          description: 文件ID列表（英文逗号分割）
+      responses:
+        200:
+          description: body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BatchGenerateFileUrlResponse"
+
+# 模型
+components:
+  schemas:
+    GenerateFileUploadUrlResponse:
+      type: object
+      description: 生成上传签名地址响应数据
+      properties:
+        id:
+          type: string
+          description: 文件ID
+        url:
+          type: string
+          description: 文件访问地址
+    UploadFileResponse:
+      type: object
+      description: 上传文件响应参数
+      properties:
+        id:
+          type: string
+          description: 文件ID
+        url:
+          type: string
+          description: 文件访问地址
+    GenerateFileUrlResponse:
+      type: object
+      description: 生成文件访问地址响应数据
+      properties:
+        url:
+          type: string
+          description: 文件访问地址
+    BatchGenerateFileUrlResponse:
+      type: object
+      description: 生成文件访问地址响应数据
+      properties:
+        data:
+          type: array
+          items:
+            - $ref: "#/components/schemas/GenerateFileUrlItem"
+    GenerateFileUrlItem:
+      type: object
+      description: 文件和url条目
+      properties:
+        id:
+          type: string
+          description: 文件ID
+        url:
+          type: string
+          description: 文件访问地址
+    GenerateFileUploadUrlRequest:
+      type: object
+      description: 生成上传签名地址请求参数
+      properties:
+        key:
+          type: string
+          description: 对象key
